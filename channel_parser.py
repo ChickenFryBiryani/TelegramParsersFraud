@@ -4,6 +4,7 @@ import os
 import json
 import datetime
 import database_connector
+from pathlib import Path
 
 telegram_data_folder_path = "/home/rob/Downloads/Telegram Desktop/"
 chat_folder_path = ""
@@ -38,19 +39,20 @@ def getText(message):
 def main():
     global telegram_channel_id
     global chat_folder_path
-    all_folders = os.listdir(telegram_data_folder_path)
-    all_folders.sort()
+    # all_folders = os.listdir(telegram_data_folder_path)
+    # all_folders.sort()
+    all_folders = list(map(lambda x: str(x), sorted(Path(telegram_data_folder_path).iterdir(), key=os.path.getmtime)))
     for folder in all_folders:
         print('***************************************************************')
         print('Parsing: ', folder)
-        chat_folder_path = telegram_data_folder_path + folder + '/'
+        chat_folder_path = folder + '/'
         with open(chat_folder_path + 'result.json') as chat_file:
             chat_content = json.load(chat_file)
-        if chat_content['type'] != 'public_channel':
+        if 'channel' not in chat_content['type']:
             print('Not a channel.')
             continue
         telegram_channel_id = chat_content['id']
-        telegram_channel_name = chat_content['name']
+        telegram_channel_name = chat_content['name'].replace("'", '"')
         telegram_db = database_connector.mySQLTelegramDB()
         search_response = telegram_db.get_channel_id_from_telegram_id(telegram_channel_id)
         if not search_response:
@@ -74,7 +76,7 @@ def main():
         # Copy telegram chat to jaguar
         remote_path = str(telegram_channel_id) + '/'
         # Rename the result json
-        os.rename(chat_folder_path+'result.json', chat_folder_path.replace(' ', '\ ')+"{}.json".
+        os.rename(chat_folder_path+'result.json', chat_folder_path+"{}.json".
                   format(chat_folder_path.split('_')[-1].replace(' ', '_')[:-1]))
         telegram_db.copy_folder_to_jaguar(chat_folder_path, remote_path, is_group=False)
         # if input('Delete the data in local system?(y/n): ').lower() == 'y':

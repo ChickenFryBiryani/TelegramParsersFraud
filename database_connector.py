@@ -100,10 +100,12 @@ class mySQLTelegramDB:
     def add_users_if_not_exists(self, users_info):
         if not self.get_db_connection():
             return False
+        # with open('sample.txt', 'w') as fp:
+        #     fp.write(str(users_info)[1:-1])
         query = "INSERT INTO group_users (user_name, user_telegram_id) WITH temp(user_name, user_telegram_id) AS " \
                 "(VALUES {}) SELECT temp.user_name, temp.user_telegram_id FROM temp LEFT JOIN group_users ON " \
                 "group_users.user_telegram_id = temp.user_telegram_id " \
-                "WHERE group_users.user_telegram_id IS NULL".format(str(tuple(users_info))[1:-1])
+                "WHERE group_users.user_telegram_id IS NULL".format(str(users_info)[1:-1])
         self.telegram_cursor.execute(query)
         new_user_count = self.telegram_cursor.rowcount
         self.telegram_conn.commit()
@@ -173,7 +175,8 @@ class mySQLTelegramDB:
     def copy_folder_to_jaguar(self, local_path, remote_path, is_group):
         # check if the folder exists in jaguar. if not create
         folder = "groups/" if is_group else "channels/"
-        cd = "sshpass -p '{}' rsync -ave ssh -r {} {}@{}:{}".format(self.m_sServerPasswd, local_path.replace(' ', "\ "),
+        mod_path = local_path.replace(' ', '\ ').replace('(', '\(').replace(')', '\)')
+        cd = "sshpass -p '{}' rsync -ave ssh -r {} {}@{}:{}".format(self.m_sServerPasswd, mod_path,
                                                                     self.m_sServerUser, self.m_sServerHost,
                                                                     self.telegram_data_root + folder + remote_path)
         os.system(cd)

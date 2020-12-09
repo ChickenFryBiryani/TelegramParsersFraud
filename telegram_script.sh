@@ -1,4 +1,4 @@
 #!/bin/sh
-python3 /home/rob/PycharmProjects/TelegramParsers/channel_parser.py
-python3 /home/rob/PycharmProjects/TelegramParsers/group_parser.py
+python3 channel_parser.py
+python3 group_parser.py
 
