@@ -68,13 +68,13 @@ def main():
         if not from_msg_id:
             continue
         pending_msgs = list(filter(lambda x: x['id'] > from_msg_id, chat_content['messages']))
-        if len(pending_msgs) == 0:
+        if len(pending_msgs) <= 1:
             print('No new messages.')
             # if input('Delete the data in local system?(y/n): ').lower() == 'y':
             os.system('rm -rf {}'.format(chat_folder_path.replace(' ', '\ ').replace('(', '\(').replace(')', '\)')))
             continue
         # Add all the new users to group_users table
-        users = list(set(map(lambda x: (str(x['from']).replace("'", ""), x['from_id']) if 'from' in x else (str(x['actor']).replace("'", ""), x['actor_id']),
+        users = list(set(map(lambda x: (str(x['from']).replace("'", "").replace('(', '').replace(')', ''), x['from_id']) if 'from' in x else (str(x['actor']).replace("'", "").replace('(', '').replace(')', ''), x['actor_id']),
                              pending_msgs)))
         user_dict = {}
         for use in users:

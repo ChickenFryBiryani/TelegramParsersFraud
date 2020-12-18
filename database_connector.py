@@ -36,8 +36,6 @@ class mySQLTelegramDB:
         return False
 
     def close_db_connection(self):
-        # if self.telegram_cursor:
-        #     self.telegram_cursor.close()
         if self.telegram_conn:
             self.telegram_conn.close()
 
@@ -100,8 +98,7 @@ class mySQLTelegramDB:
     def add_users_if_not_exists(self, users_info):
         if not self.get_db_connection():
             return False
-        # with open('sample.txt', 'w') as fp:
-        #     fp.write(str(users_info)[1:-1])
+        users_info.append(('None', 5210405246))
         query = "INSERT INTO group_users (user_name, user_telegram_id) WITH temp(user_name, user_telegram_id) AS " \
                 "(VALUES {}) SELECT temp.user_name, temp.user_telegram_id FROM temp LEFT JOIN group_users ON " \
                 "group_users.user_telegram_id = temp.user_telegram_id " \
@@ -114,7 +111,6 @@ class mySQLTelegramDB:
             format(str(tuple(map(lambda x: x[1], users_info))))
         self.telegram_cursor.execute(id_query)
         result = self.telegram_cursor.fetchall()
-        # print(result)
         user_id_dict = {}
         for tid in result:
             user_id_dict[str(tid[1])] = tid[0]
